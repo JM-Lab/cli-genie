@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.0'
+}
+
+group 'kr.jmlab'
+version '0.1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation "kr.jmlab:jmlab-utils-java11:0.1.4"
+    implementation "commons-cli:commons-cli:1.5.0"
+    implementation "org.slf4j:slf4j-simple:1.7.36"
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+jar {
+    finalizedBy shadowJar
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
+}
+
+application {
+    mainClass = 'kr.jm.gpt.CliGenie'
+    applicationDefaultJvmArgs = ['-Xms32m', '-Xmx128m']
+}
+
+task install(type: CreateStartScripts) {
+    dependsOn('copyLibs')
+    applicationName = 'cg'
+    mainClass = application.mainClass
+    defaultJvmOpts = application.applicationDefaultJvmArgs
+    outputDir = file('bin')
+    classpath = files("cli-genie-${version}-all.jar")
+    doLast {
+        unixScript.text = unixScript.text.replace("\$0", outputDir.toString() + '/cli-genie')
+        windowsScript.text = windowsScript.text.replaceFirst("%~dp0", outputDir.toString() + '/cli-genie')
+    }
+}
+
+task copyLibs(type: Copy) {
+    dependsOn('installShadowDist')
+    from(new File('build/libs')) { include '**' }
+    into new File(buildDir, '../lib')
+}
+
+clean {
+    dependsOn('cleanCopyLibs', 'cleanInstall')
+}
+
+test {
+    useJUnitPlatform()
+}
