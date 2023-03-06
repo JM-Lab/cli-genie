@@ -18,7 +18,7 @@ public class CliGenie {
     public CliGenie(GptCompletionsInterface gptCompletions) {
         String lineSeparator = OS.getLineSeparator();
         this.context = "Platform: " + OS.getOsName() + lineSeparator + "Version: " + OS.getOsVersion() +
-                lineSeparator + "Do Not: explanations" + lineSeparator + "Generate a shell command to ";
+                lineSeparator + "Do Not: explanations" + lineSeparator + "Generate a shell command or recommendation to ";
         this.gptCompletions = gptCompletions;
     }
 
