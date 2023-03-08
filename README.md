@@ -5,6 +5,7 @@ To put it simply, CLI Genie helps users who are not comfortable with writing com
 
 The CLI Genie is powered by OpenAI's advanced language model called gpt-3.5-turbo. It performs similarly to text-davinci-003 but is 10% cheaper per token.
 
+![Screenshot](https://raw.githubusercontent.com/JM-Lab/cli-genie/main/screenshot.gif)
 ## The Key Features
 1. Support for native language input
    * User input in their native language is understood and processed.
