@@ -9,24 +9,60 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CliGenieCommandLineTest {
 
-    @Test
-    void start() {
-        CliGenieCommandLine cliGenieCommandLine = new CliGenieCommandLine();
+    public static final String HELP = "usage: cg [Options] <instructions in mother tongue>\n" +
+            "\n" +
+            "Example:\n" +
+            "cg replace the letters \"abc\" with \"cba\" in the file test.txt\n" +
+            "\n" +
+            "Options:\n" +
+            " -h,--help   Print help message\n" +
+            " -n,--no     Do not use copy to clipboard\n" +
+            "CLI Genie: https://github.com/JM-Lab/cli-genie";
 
+    @Test
+    void buildCliOptionsPromptTest1() {
+        CliGenieCommandLine cliGenieCommandLine = new CliGenieCommandLine();
         PrintStream previousConsole = System.out;
         ByteArrayOutputStream newConsole = new ByteArrayOutputStream();
         System.setOut(new PrintStream(newConsole));
-//        gptCliHelperInit.start("-c",
-//                JMResources.getURL("JMMetricConfigTest.json").getPath());
-        cliGenieCommandLine.start();
-        assertEquals("usage: cg [instructions in mother tongue] [-h]\n" +
-                "\n" +
-                "Example:\n" +
-                "cg replace the letters \"abc\" with \"cba\" in the file test.txt\n" +
-                "\n" +
-                "Options:\n" +
-                " -h,--help   print help message\n" +
-                "CLI Genie: https://github.com/JM-Lab/cli-genie\n", newConsole.toString());
+        assertEquals("CliOptionsPrompt(options=null, prompt=null)",
+                cliGenieCommandLine.buildCliOptionsPrompt("-h", "-n", "ldsjaf").toString());
+        assertEquals(HELP, newConsole.toString().trim());
+        System.setOut(previousConsole);
+    }
+
+    @Test
+    void buildCliOptionsPromptTest2() {
+        CliGenieCommandLine cliGenieCommandLine = new CliGenieCommandLine();
+        PrintStream previousConsole = System.out;
+        ByteArrayOutputStream newConsole = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(newConsole));
+        assertEquals("CliOptionsPrompt(options=null, prompt=null)",
+                cliGenieCommandLine.buildCliOptionsPrompt("-n").toString());
+        assertEquals(HELP, newConsole.toString().trim());
+        System.setOut(previousConsole);
+    }
+
+    @Test
+    void buildCliOptionsPromptTest3() {
+        CliGenieCommandLine cliGenieCommandLine = new CliGenieCommandLine();
+        PrintStream previousConsole = System.out;
+        ByteArrayOutputStream newConsole = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(newConsole));
+        assertEquals("CliOptionsPrompt(options=null, prompt=null)",
+                cliGenieCommandLine.buildCliOptionsPrompt().toString());
+        assertEquals("", newConsole.toString().trim());
+        System.setOut(previousConsole);
+    }
+
+    @Test
+    void printHelpTest() {
+        CliGenieCommandLine cliGenieCommandLine = new CliGenieCommandLine();
+        PrintStream previousConsole = System.out;
+        ByteArrayOutputStream newConsole = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(newConsole));
+        cliGenieCommandLine.printHelp();
+        assertEquals(HELP, newConsole.toString().trim());
         System.setOut(previousConsole);
     }
 }

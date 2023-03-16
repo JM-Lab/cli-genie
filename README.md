@@ -6,15 +6,15 @@ To put it simply, CLI Genie helps users who are not comfortable with writing com
 The CLI Genie is powered by OpenAI's advanced language model called gpt-3.5-turbo. It performs similarly to text-davinci-003 but at 10% the price per token.
 
 ![Screenshot](https://raw.githubusercontent.com/JM-Lab/cli-genie/main/screenshot.gif)
-## The Key Features
-1. Support for native language input
-   * User input in their native language is understood and processed.
+## Key Features of CLI Genie
+1. Native Language Input Support
+   * CLI Genie understands and processes user input in their native language.
 
-2. OS and version awareness
-   * Appropriate CLI commands are suggested based on the user's operating system and version.
+2. OS and Version-Awareness
+   * CLI Genie suggests appropriate CLI commands or recommendations based on the user's operating system and version.
    
-3. Similar command recommendations
-   * If no appropriate command is found, similar commands with the same intent are recommended.
+3. Automatic Copying of GPT's Response
+   * Users can easily paste the generated content in response to their queries using CLI Genie.
 
 ## Installation
 
@@ -47,10 +47,22 @@ You can run CLI Genie by using the `cg` (short for CLI Genie). Available command
 tongue. 
 The usage of the cg command is as follows:
 ```
-cg [instructions in mother tongue]
+usage: cg [Options] <instructions in mother tongue>
+
+Example:
+cg replace the letters "abc" with "cba" in the file test.txt
+
+Options:
+ -h,--help   Print help message
+ -n,--no     Do not use copy to clipboard
 ```
 ## Examples
-Here's examples of the usage of CLI Genie in various languages
+Here is an example of commands that can be given to CLI Genie in various languages, all of which produce the same response:
+```
+sed -i '' 's/abc/cba/g' test.txt
+
+Copied GPT's response to clipboard. Paste shortcut: Command + V (MacOS).
+```
 
 ### Korean
 ```

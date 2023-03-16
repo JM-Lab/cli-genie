@@ -4,36 +4,33 @@ import kr.jm.gpt.openai.OpenAiCompletions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+
+import static kr.jm.gpt.CliGenieCommandLineTest.HELP;
 
 // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
 @ExtendWith(MockitoExtension.class)
 class CliGenieTest {
-    private static final String CONTEXT = "CONTEXT";
     static PrintStream previousConsole;
     static ByteArrayOutputStream newConsole;
     static String openAiKey;
-    @Mock
-    private GptCompletionsInterface gptCompletions;
-    @InjectMocks
-    private CliGenie cliGenie;
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void beforeEach() {
         previousConsole = System.out;
         newConsole = new ByteArrayOutputStream();
         System.setOut(new PrintStream(newConsole));
     }
 
-    @AfterAll
-    static void afterAll() {
+    @AfterEach
+    void afterEach() {
         System.setOut(previousConsole);
     }
 
@@ -41,44 +38,93 @@ class CliGenieTest {
     @Disabled
     @Test
     void start() {
-        cliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법");
-        Assertions.assertEquals("sed -i '' 's/abc/cba/g' test.txt\n", newConsole.toString());
+        CliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법");
+        Assertions.assertEquals(
+                "sed -i '' 's/abc/cba/g' test.txt\n\nCopied GPT's response to clipboard. Paste shortcut: Command + V " +
+                        "(MacOS).",
+                newConsole.toString().trim());
         previousConsole.println(newConsole);
 
         CliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 명령 3개");
         previousConsole.println(newConsole);
         Assertions.assertEquals("sed -i '' 's/abc/cba/g' test.txt\n" +
-                "1. sed -i '' 's/abc/cba/g' test.txt\n" +
-                "2. perl -pi -e 's/abc/cba/g' test.txt\n" +
-                "3. awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt", newConsole.toString());
+                "\n" +
+                "Copied GPT's response to clipboard. Paste shortcut: Command + V (MacOS).\n" +
+                "1. Using sed command:\n" +
+                "sed -i '' 's/abc/cba/g' test.txt\n" +
+                "\n" +
+                "2. Using awk command:\n" +
+                "awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt\n" +
+                "\n" +
+                "3. Using perl command:\n" +
+                "perl -pi -e 's/abc/cba/g' test.txt\n" +
+                "\n" +
+                "Copied GPT's response to clipboard. Paste shortcut: Command + V (MacOS).", newConsole.toString().trim());
     }
 
     // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
     @Disabled
     @Test
-    void startWithMock() {
-        Mockito.when(gptCompletions.request(ArgumentMatchers.anyString()))
-                .thenReturn("sed -i '' 's/abc/cba/g' test.txt");
-        cliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법\n");
+    void startWithoutClipboard() throws IOException, UnsupportedFlavorException {
+        String expected = "sed -i '' 's/abc/cba/g' test.txt";
+        CliGenie.main("-n", "test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법");
         previousConsole.println(newConsole);
-        Assertions.assertEquals("sed -i '' 's/abc/cba/g' test.txt\n", newConsole.toString());
+        previousConsole.println("Clipboard Data: " + Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null)
+                .getTransferData(DataFlavor.stringFlavor));
+
+        Assertions.assertNotEquals(expected, Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null)
+                .getTransferData(DataFlavor.stringFlavor));
+        Assertions.assertEquals(expected, newConsole.toString().trim());
     }
 
     // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
     @Disabled
     @Test
-    void start2WithMock() {
-        Mockito.when(gptCompletions.request(ArgumentMatchers.anyString()))
-                .thenReturn("sed -i '' 's/abc/cba/g' test.txt\n" +
-                        "1. sed -i '' 's/abc/cba/g' test.txt\n" +
-                        "2. perl -pi -e 's/abc/cba/g' test.txt\n" +
-                        "3. awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt");
-        cliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 명령 3개");
+    void startWithClipboard() throws IOException, UnsupportedFlavorException {
+        String expected = "1. Using sed command:\n" +
+                "sed -i '' 's/abc/cba/g' test.txt\n" +
+                "\n" +
+                "2. Using awk command:\n" +
+                "awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt\n" +
+                "\n" +
+                "3. Using perl command:\n" +
+                "perl -pi -e 's/abc/cba/g' test.txt";
+
+        CliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 명령 3개");
         previousConsole.println(newConsole);
-        Assertions.assertEquals("sed -i '' 's/abc/cba/g' test.txt\n" +
-                "1. sed -i '' 's/abc/cba/g' test.txt\n" +
-                "2. perl -pi -e 's/abc/cba/g' test.txt\n" +
-                "3. awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt", newConsole.toString());
+
+        previousConsole.println("Clipboard Data: " + Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null)
+                .getTransferData(DataFlavor.stringFlavor));
+
+        Assertions.assertEquals(expected, Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null)
+                .getTransferData(DataFlavor.stringFlavor));
+        Assertions.assertEquals(expected + "\n\nCopied GPT's response to clipboard. Paste shortcut: Command + V " +
+                        "(MacOS).",
+                newConsole.toString().trim());
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "OPENAI_API_KEY", value = "testKey")
+    void emptyTest() {
+        CliGenie.main();
+        previousConsole.println(newConsole);
+        Assertions.assertEquals(HELP, newConsole.toString().trim());
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "OPENAI_API_KEY", value = "testKey")
+    void emptyTest2() {
+        CliGenie.main("-n");
+        previousConsole.println(newConsole);
+        Assertions.assertEquals(HELP, newConsole.toString().trim());
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = "OPENAI_API_KEY", value = "testKey")
+    void helpTest() {
+        CliGenie.main("-n", "-h", "alsjkdflk");
+        previousConsole.println(newConsole);
+        Assertions.assertEquals(HELP, newConsole.toString().trim());
     }
 
     @Test
