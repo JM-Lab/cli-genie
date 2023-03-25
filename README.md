@@ -16,6 +16,9 @@ The CLI Genie is powered by OpenAI's advanced language model called gpt-3.5-turb
 3. Automatic Copying of GPT's Response
    * Users can easily paste the generated content in response to their queries using CLI Genie.
 
+4. Used OpenAI API's Server-Sent Events (SSE) for response handling.
+   * CLI Genie can receive updates as they happen, allowing for a more interactive and responsive experience.
+
 ## Installation
 
 ### Requirements
