@@ -44,7 +44,7 @@ class OpenAiCompletionsTest {
 
     @Test
     void testCompletions() {
-        this.openAiCompletions = new OpenAiCompletions("https://api.openai.com/v1/completions", this.openAiKey);
+        this.openAiCompletions = new OpenAiCompletions(this.openAiKey);
         String prompt =
                 "Platform: " + OS.getOsName() + OS.getLineSeparator() + "Version: " + OS.getOsVersion() +
                         OS.getLineSeparator() + OS.getLineSeparator();

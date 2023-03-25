@@ -1,11 +1,13 @@
 package kr.jm.gpt.openai.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.List;
 import java.util.Map;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Accessors(chain = true)
 @Data
 public class OpenAiCompletionsRequest {

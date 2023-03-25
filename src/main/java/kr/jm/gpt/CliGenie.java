@@ -1,6 +1,7 @@
 package kr.jm.gpt;
 
-import kr.jm.gpt.openai.OpenAiChatCompletions;
+import kr.jm.gpt.openai.OpenAiChatCompletionsSse;
+import kr.jm.gpt.openai.sse.OpenAiChatCompletionsSseConsumer;
 import kr.jm.utils.JMArrays;
 import kr.jm.utils.JMOptional;
 import kr.jm.utils.JMResources;
@@ -17,27 +18,27 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 public class CliGenie {
-    private final String context;
-    private final GptCompletionsInterface gptCompletions;
+    private final String preConditionPrompt;
 
-    public CliGenie(GptCompletionsInterface gptCompletions) {
+
+    public CliGenie() {
         String lineSeparator = OS.getLineSeparator();
-        this.context = "Platform: " + OS.getOsName() + lineSeparator + "Version: " + OS.getOsVersion() +
+        this.preConditionPrompt = "Platform: " + OS.getOsName() + lineSeparator + "Version: " + OS.getOsVersion() +
                 lineSeparator + "Do Not: explanations" + lineSeparator +
-                "Generate a shell command or recommendation to ";
-        this.gptCompletions = gptCompletions;
+                "Generate a shell command or recommendation to the following ASK" + lineSeparator + "ASK: ";
     }
 
-    public String spell(String nativeLang) {
+    public String spell(String nativeLang, Function<String, String> spellFunction) {
         return JMOptional.getOptional(nativeLang).map(this::buildPrompt)
-                .map(this.gptCompletions::request).map(String::trim)
-                .orElse("I'm sorry, I can't offer any help with that.");
+                .map(spellFunction).map(String::trim)
+                .orElseThrow();
     }
 
     String buildPrompt(String nativeLang) {
-        return context + nativeLang;
+        return preConditionPrompt + nativeLang;
     }
 
     public static void main(String... args) {
@@ -52,13 +53,17 @@ public class CliGenie {
     private static void handleOptionAndSpell(CliOptionsPrompt cliOptionsPrompt) {
         if (JMString.isNullOrEmpty(cliOptionsPrompt.getPrompt()))
             return;
-        CliGenie cliGenie = new CliGenie(new OpenAiChatCompletions(getOpenaiApiKey()));
-        String result = cliGenie.spell(cliOptionsPrompt.getPrompt());
-        System.out.println(result);
-        handlOptions(result, cliOptionsPrompt.getOptions());
+        String systemPrompt = "in the language as the ASK";
+        String result =
+                new CliGenie().spell(cliOptionsPrompt.getPrompt(),
+                        spell -> new OpenAiChatCompletionsSse(getOpenaiApiKey()).setSystemPrompt(
+                                systemPrompt).requestWithSse(spell,
+                                new OpenAiChatCompletionsSseConsumer(System.out::print)));
+        System.out.println();
+        handlPostOptions(result, cliOptionsPrompt.getOptions());
     }
 
-    private static void handlOptions(String result, Set<String> options) {
+    private static void handlPostOptions(String result, Set<String> options) {
         if (Objects.isNull(options) || !options.contains("no")) {
             String osName = System.getProperty("os.name").toLowerCase();
             OS.addShutdownHook(() -> copyToClipboard(osName, result));
@@ -80,13 +85,13 @@ public class CliGenie {
     private static void showCopyAndPasteInfo(String osName) {
         if (osName.contains("linux")) {
             System.out.println(OS.getLineSeparator() +
-                    "Copied GPT's response to clipboard. Paste shortcut: Ctrl + Shift + V (Linux).");
+                    "Paste: Ctrl + Shift + V (Linux).");
         } else if (osName.contains("mac")) {
             System.out.println(
-                    OS.getLineSeparator() + "Copied GPT's response to clipboard. Paste shortcut: Command + V (MacOS).");
+                    OS.getLineSeparator() + "Paste: Command + V (MacOS).");
         } else if (osName.contains("windows")) {
             System.out.println(
-                    OS.getLineSeparator() + "Copied GPT's response to clipboard. Paste shortcut: Ctrl + V (Windows).");
+                    OS.getLineSeparator() + "Paste: Ctrl + V (Windows).");
         }
     }
 

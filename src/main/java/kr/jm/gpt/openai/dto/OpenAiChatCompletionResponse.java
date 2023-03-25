@@ -14,6 +14,7 @@ public class OpenAiChatCompletionResponse {
     private Long created;
     private String id;
     private String object;
+    private String model;
     private Usage usage;
 
 }

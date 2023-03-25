@@ -39,7 +39,8 @@ class OpenAiChatCompletionsTest {
     @Test
     void testCompletions() {
         this.openAiChatCompletions =
-                new OpenAiChatCompletions("https://api.openai.com/v1/chat/completions", this.openAiKey);
+                new OpenAiChatCompletions(new OpenAiApiConf("https://api.openai.com/v1/chat/completions",
+                        this.openAiKey));
         String context =
                 "Platform: " + OS.getOsName() + OS.getLineSeparator() + "Version: " + OS.getOsVersion() +
                         OS.getLineSeparator() + "Do Not: explanations" + OS.getLineSeparator();
