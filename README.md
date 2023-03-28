@@ -1,9 +1,9 @@
 # CLI Genie
-CLI Genie is a tool that assists users in writing CLI commands using their native language through OpenAI's GPT-3 API.
+CLI Genie is a tool that helps users write CLI commands using their native language with the addition of Copilot in the terminal shell through OpenAI's GPT API.
 
-To put it simply, CLI Genie helps users who are not comfortable with writing commands in English to do so using their preferred language. By utilizing OpenAI's GPT-3 API, CLI Genie can provide accurate and relevant commands based on the user's request. It is important to note, however, that as with any software that uses machine learning or AI, there may be limitations and potential errors.
+To put it simply, CLI Genie helps users who are not comfortable with writing commands in English to do so using their preferred language. By utilizing OpenAI's GPT API, CLI Genie can provide accurate and relevant commands based on the user's request.
 
-The CLI Genie is powered by OpenAI's advanced language model called gpt-3.5-turbo. It performs similarly to text-davinci-003 but at 10% the price per token.
+CLI Genie is especially useful for IT engineers or software engineers who primarily use terminal shells in Linux or Mac environments. With the addition of Copilot, users can expect even more streamlined and efficient command writing processes.
 
 ![Screenshot](https://raw.githubusercontent.com/JM-Lab/cli-genie/main/screenshot.gif)
 ## Key Features of CLI Genie
