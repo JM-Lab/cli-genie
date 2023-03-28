@@ -33,10 +33,13 @@ public class CliGenieCommandLine {
 
     public CommandLine printHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        String syntax = "cg [Options] <instructions in mother tongue>";
+        String syntax =
+                "cg [Options] <instructions in mother tongue>\n* Use \\ or enclose special characters in instructions.";
         String usageHeader = "\nExample:\ncg replace the letters \"abc\" with \"cba\" in the file test" +
                 ".txt\n\nOptions:";
-        String usageFooter = "CLI Genie: https://github.com/JM-Lab/cli-genie";
+        String usageFooter = "\nTo ask general questions to GPT, use 'cgg' (same as 'cg -g') in linux or mac.\nCLI " +
+                "Genie:" +
+                " https://github.com/JM-Lab/cli-genie";
         formatter.printHelp(120, syntax, usageHeader, this.options, usageFooter, false);
         return null;
     }

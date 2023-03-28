@@ -18,6 +18,9 @@ The CLI Genie is powered by OpenAI's advanced language model called gpt-3.5-turb
 
 4. Used OpenAI API's Server-Sent Events (SSE) for response handling.
    * CLI Genie can receive updates as they happen, allowing for a more interactive and responsive experience.
+   
+5. General Question-Answering with GPT
+   * Users can ask general questions to CLI Genie using CLI commands 'cgg' (same as 'cg -g') just like ChatGPT.
 
 ## Installation
 
@@ -32,6 +35,7 @@ git clone https://github.com/JM-Lab/cli-genie.git
 cd cli-genie
 ./gradlew install
 sudo cp bin/cg /usr/local/bin
+echo "alias cgg='cg -g'" >> ~/.bashrc
 export OPENAI_API_KEY=[your key]
 ```
 ### Windows
@@ -51,13 +55,18 @@ tongue.
 The usage of the cg command is as follows:
 ```
 usage: cg [Options] <instructions in mother tongue>
+* Use \ or enclose special characters in instructions.
 
 Example:
 cg replace the letters "abc" with "cba" in the file test.txt
 
 Options:
- -h,--help   Print help message
- -n,--no     Do not use copy to clipboard
+ -g,--general   General query to GPT
+ -h,--help      Print help message
+ -n,--no        Do not use copy to clipboard
+
+To ask general questions to GPT, use 'cgg' (same as 'cg -g') in linux or mac.
+CLI Genie: https://github.com/JM-Lab/cli-genie
 ```
 ## Examples
 Here is an example of commands that can be given to CLI Genie in various languages, all of which produce the same response:
