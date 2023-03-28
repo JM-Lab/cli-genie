@@ -2,10 +2,11 @@ package kr.jm.gpt;
 
 
 import kr.jm.utils.JMOptional;
+import kr.jm.utils.JMStream;
 import kr.jm.utils.JMString;
 import org.apache.commons.cli.*;
 
-import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class CliGenieCommandLine {
 
@@ -17,7 +18,7 @@ public class CliGenieCommandLine {
 
     public CliOptionsPrompt buildCliOptionsPrompt(String... args) {
         return JMOptional.getOptional(args).map(this::parseCLI)
-                .map(this::buildCommandLine).orElseGet(CliOptionsPrompt::new);
+                .map(this::buildCommandLine).orElse(null);
     }
 
     private CommandLine parseCLI(String... args) {
@@ -42,16 +43,16 @@ public class CliGenieCommandLine {
 
     private Options buildCLIOptions() {
         Options options = new Options();
-        options.addOption("n", "no", false, "Do not use copy to clipboard");
+        options.addOption("g", "general", false, "General query to GPT");
         options.addOption("h", "help", false, "Print help message");
-//        options.addOption("c", "config", true, "a file path of config, default: ~/.cg");
+        options.addOption("n", "no", false, "Do not use copy to clipboard");
         return options;
     }
 
     private CliOptionsPrompt buildCommandLine(CommandLine commandLine) {
         CliOptionsPrompt cliOptionsPrompt = new CliOptionsPrompt();
-        if (commandLine.hasOption("no"))
-            cliOptionsPrompt.setOptions(new HashSet<>()).getOptions().add("no");
+        cliOptionsPrompt.setOptions(JMStream.buildStream(commandLine.getOptions()).map(option -> option.getLongOpt())
+                .collect(Collectors.toSet()));
         return cliOptionsPrompt.setPrompt(JMString.joiningWithSpace(commandLine.getArgList()));
     }
 

@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class CliGenieCommandLineTest {
 
@@ -15,8 +16,9 @@ class CliGenieCommandLineTest {
             "cg replace the letters \"abc\" with \"cba\" in the file test.txt\n" +
             "\n" +
             "Options:\n" +
-            " -h,--help   Print help message\n" +
-            " -n,--no     Do not use copy to clipboard\n" +
+            " -g,--general   General query to GPT\n" +
+            " -h,--help      Print help message\n" +
+            " -n,--no        Do not use copy to clipboard\n" +
             "CLI Genie: https://github.com/JM-Lab/cli-genie";
 
     @Test
@@ -25,8 +27,7 @@ class CliGenieCommandLineTest {
         PrintStream previousConsole = System.out;
         ByteArrayOutputStream newConsole = new ByteArrayOutputStream();
         System.setOut(new PrintStream(newConsole));
-        assertEquals("CliOptionsPrompt(options=null, prompt=null)",
-                cliGenieCommandLine.buildCliOptionsPrompt("-h", "-n", "ldsjaf").toString());
+        assertNull(cliGenieCommandLine.buildCliOptionsPrompt("-h", "-n", "ldsjaf"));
         assertEquals(HELP, newConsole.toString().trim());
         System.setOut(previousConsole);
     }
@@ -37,8 +38,7 @@ class CliGenieCommandLineTest {
         PrintStream previousConsole = System.out;
         ByteArrayOutputStream newConsole = new ByteArrayOutputStream();
         System.setOut(new PrintStream(newConsole));
-        assertEquals("CliOptionsPrompt(options=null, prompt=null)",
-                cliGenieCommandLine.buildCliOptionsPrompt("-n").toString());
+        assertNull(cliGenieCommandLine.buildCliOptionsPrompt("-n"));
         assertEquals(HELP, newConsole.toString().trim());
         System.setOut(previousConsole);
     }
@@ -49,8 +49,7 @@ class CliGenieCommandLineTest {
         PrintStream previousConsole = System.out;
         ByteArrayOutputStream newConsole = new ByteArrayOutputStream();
         System.setOut(new PrintStream(newConsole));
-        assertEquals("CliOptionsPrompt(options=null, prompt=null)",
-                cliGenieCommandLine.buildCliOptionsPrompt().toString());
+        assertNull(cliGenieCommandLine.buildCliOptionsPrompt());
         assertEquals("", newConsole.toString().trim());
         System.setOut(previousConsole);
     }

@@ -5,7 +5,6 @@ import kr.jm.gpt.openai.sse.OpenAiChatCompletionsSseConsumer;
 import kr.jm.utils.JMArrays;
 import kr.jm.utils.JMOptional;
 import kr.jm.utils.JMResources;
-import kr.jm.utils.JMString;
 import kr.jm.utils.enums.OS;
 import kr.jm.utils.helper.JMFile;
 import kr.jm.utils.helper.JMPath;
@@ -31,13 +30,11 @@ public class CliGenie {
                 "Generate a shell command or recommendation to the following ASK" + lineSeparator + "ASK: ";
     }
 
-    public String spell(String nativeLang, Function<String, String> spellFunction) {
-        return JMOptional.getOptional(nativeLang).map(this::buildPrompt)
-                .map(spellFunction).map(String::trim)
-                .orElseThrow();
+    public String spell(String prmpter, Function<String, String> spellFunction) {
+        return JMOptional.getOptional(prmpter).map(spellFunction).map(String::trim).orElseThrow();
     }
 
-    String buildPrompt(String nativeLang) {
+    String buildPromptWithCondition(String nativeLang) {
         return preConditionPrompt + nativeLang;
     }
 
@@ -51,19 +48,37 @@ public class CliGenie {
     }
 
     private static void handleOptionAndSpell(CliOptionsPrompt cliOptionsPrompt) {
-        if (JMString.isNullOrEmpty(cliOptionsPrompt.getPrompt()))
-            return;
-        String systemPrompt = "in the language as the ASK";
-        String result =
-                new CliGenie().spell(cliOptionsPrompt.getPrompt(),
-                        spell -> new OpenAiChatCompletionsSse(getOpenaiApiKey()).setSystemPrompt(
-                                systemPrompt).requestWithSse(spell,
-                                new OpenAiChatCompletionsSseConsumer(System.out::print)));
+        String result = handleOptionAndSpell(new CliGenie(), cliOptionsPrompt, cliOptionsPrompt.getPrompt(),
+                new OpenAiChatCompletionsSse(getOpenaiApiKey()),
+                new OpenAiChatCompletionsSseConsumer(System.out::print));
         System.out.println();
-        handlPostOptions(result, cliOptionsPrompt.getOptions());
+        handlePostOptions(result, cliOptionsPrompt.getOptions());
     }
 
-    private static void handlPostOptions(String result, Set<String> options) {
+    private static String handleOptionAndSpell(CliGenie cliGenie, CliOptionsPrompt cliOptionsPrompt, String prompt,
+            OpenAiChatCompletionsSse openAiChatCompletionsSse,
+            OpenAiChatCompletionsSseConsumer openAiChatCompletionsSseConsumer) {
+        return Optional.ofNullable(
+                handleGeneralQuery(cliGenie, cliOptionsPrompt.getOptions(), prompt, openAiChatCompletionsSse,
+                        openAiChatCompletionsSseConsumer)).orElseGet(() -> handleCliQuery(cliGenie, prompt,
+                openAiChatCompletionsSse, openAiChatCompletionsSseConsumer));
+    }
+
+    private static String handleGeneralQuery(CliGenie cliGenie, Set<String> options, String prompt,
+            OpenAiChatCompletionsSse openAiChatCompletionsSse,
+            OpenAiChatCompletionsSseConsumer openAiChatCompletionsSseConsumer) {
+        return Objects.nonNull(options) && options.contains("general") ? cliGenie.spell(prompt,
+                spell -> openAiChatCompletionsSse.requestWithSse(spell, openAiChatCompletionsSseConsumer)) : null;
+    }
+
+    private static String handleCliQuery(CliGenie cliGenie, String prompt,
+            OpenAiChatCompletionsSse openAiChatCompletionsSse,
+            OpenAiChatCompletionsSseConsumer openAiChatCompletionsSseConsumer) {
+        return cliGenie.spell(prompt, spell -> openAiChatCompletionsSse.setSystemPrompt("in the language as the ASK")
+                .requestWithSse(cliGenie.buildPromptWithCondition(spell), openAiChatCompletionsSseConsumer));
+    }
+
+    private static void handlePostOptions(String result, Set<String> options) {
         if (Objects.isNull(options) || !options.contains("no")) {
             String osName = System.getProperty("os.name").toLowerCase();
             OS.addShutdownHook(() -> copyToClipboard(osName, result));

@@ -39,8 +39,7 @@ class CliGenieTest {
     void start() {
         CliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법");
         Assertions.assertEquals(
-                "sed -i '' 's/abc/cba/g' test.txt\n\nPaste: Command + V " +
-                        "(MacOS).",
+                "sed -i '' 's/abc/cba/g' test.txt\n\nPaste: Command + V (MacOS).",
                 newConsole.toString().trim());
         previousConsole.println(newConsole);
 
@@ -64,6 +63,31 @@ class CliGenieTest {
     // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
     @Disabled
     @Test
+    void startWithGeneral() {
+        CliGenie.main("-g", "test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법");
+        Assertions.assertEquals(
+                "파일을 열어서 텍스트 에디터에서 \"abc\"를 \"cba\"로 바꾸는 것이 가장 간단한 방법입니다. 만약 파일이 매우 크거나 여러 개의 파일에서 바꾸어야 하는 경우, 스크립트를 사용하여 자동으로 바꿀 수도 있습니다. 예를 들어, Python 스크립트를 사용하여 다음과 같이 작성할 수 있습니다.\n" +
+                        "\n" +
+                        "```python\n" +
+                        "with open('test.txt', 'r') as file:\n" +
+                        "    data = file.read()\n" +
+                        "\n" +
+                        "data = data.replace('abc', 'cba')\n" +
+                        "\n" +
+                        "with open('test.txt', 'w') as file:\n" +
+                        "    file.write(data)\n" +
+                        "```\n" +
+                        "\n" +
+                        "이 스크립트는 'test.txt' 파일을 열어서 파일 내용을 읽은 다음, 'abc'를 'cba'로 바꾸고 다시 파일에 쓰는 것입니다. 이 스크립트를 실행하면 파일 내용이 변경됩니다.\n" +
+                        "\n" +
+                        "Paste: Command + V (MacOS).",
+                newConsole.toString().trim());
+        previousConsole.println(newConsole);
+    }
+
+    // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
+    @Disabled
+    @Test
     void startWithoutClipboard() throws IOException, UnsupportedFlavorException {
         String expected = "sed -i '' 's/abc/cba/g' test.txt";
         CliGenie.main("-n", "test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법");
@@ -81,13 +105,19 @@ class CliGenieTest {
     @Test
     void startWithClipboard() throws IOException, UnsupportedFlavorException {
         String expected = "1. Using sed command:\n" +
+                "```\n" +
                 "sed -i '' 's/abc/cba/g' test.txt\n" +
+                "```\n" +
                 "\n" +
                 "2. Using awk command:\n" +
+                "```\n" +
                 "awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt\n" +
+                "```\n" +
                 "\n" +
                 "3. Using perl command:\n" +
-                "perl -pi -e 's/abc/cba/g' test.txt";
+                "```\n" +
+                "perl -pi -e 's/abc/cba/g' test.txt\n" +
+                "```";
 
         CliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 명령 3개");
         previousConsole.println(newConsole);
@@ -97,13 +127,13 @@ class CliGenieTest {
 
         Assertions.assertEquals(expected, Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null)
                 .getTransferData(DataFlavor.stringFlavor));
-        Assertions.assertEquals(expected + "\n\nPaste: Command + V " +
-                        "(MacOS).",
+        Assertions.assertEquals(expected + "\n\nPaste: Command + V (MacOS).",
                 newConsole.toString().trim());
     }
 
+    @Disabled
     @Test
-    void startAsk() throws IOException, UnsupportedFlavorException {
+    void startAsk() {
         String expected = "Java 설치 명령어는 다음과 같습니다:\n" +
                 "\n" +
                 "```\n" +
@@ -145,16 +175,18 @@ class CliGenieTest {
     @Test
     @SetEnvironmentVariable(key = "OPENAI_API_KEY", value = "testKey")
     void buildPrompt() {
-        String prompt = new CliGenie().buildPrompt("플랫폼 이름과 버전");
+        String prompt = new CliGenie().buildPromptWithCondition("플랫폼 이름과 버전");
         Assertions.assertEquals("Platform: Mac OS X\n" +
                 "Version: 10.16\n" +
                 "Do Not: explanations\n" +
-                "Generate a shell command or recommendation to 플랫폼 이름과 버전", prompt);
-        prompt = new CliGenie().buildPrompt("플랫폼 이름과 버전 알수 있는 예를 3개 보여줘");
+                "Generate a shell command or recommendation to the following ASK\n" +
+                "ASK: 플랫폼 이름과 버전", prompt);
+        prompt = new CliGenie().buildPromptWithCondition("플랫폼 이름과 버전 알수 있는 예를 3개 보여줘");
         Assertions.assertEquals("Platform: Mac OS X\n" +
                 "Version: 10.16\n" +
                 "Do Not: explanations\n" +
-                "Generate a shell command or recommendation to 플랫폼 이름과 버전 알수 있는 예를 3개 보여줘", prompt);
+                "Generate a shell command or recommendation to the following ASK\n" +
+                "ASK: 플랫폼 이름과 버전 알수 있는 예를 3개 보여줘", prompt);
     }
 
 }
