@@ -1,5 +1,8 @@
 #!/bin/bash
-
+if [ $EUID != 0 ]; then
+    sudo "$0" "$@"
+    exit $?
+fi
 # check if java is installed
 if ! command -v java &> /dev/null
 then
