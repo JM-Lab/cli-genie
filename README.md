@@ -23,14 +23,27 @@ CLI Genie is especially useful for IT engineers or software engineers who primar
    * Users can ask general questions to CLI Genie using CLI commands 'cgg' (same as 'cg -g') just like ChatGPT.
 
 ## Installation
-
 ### Requirements
 - git
 - Java 11 or higher
 - OpenAI API key
 
 ### Linux and Mac
+#### Auto-install with dependencies
+You can install cli-genie with its dependencies by running the following command:
 ```
+curl https://raw.githubusercontent.com/JM-Lab/cli-genie/main/scripts/install-cli-genie.sh | sh
+export OPENAI_API_KEY=[your key]
+```
+#### Uninstall
+You can uninstall cli-genie by running the following command:
+```
+curl https://raw.githubusercontent.com/JM-Lab/cli-genie/main/scripts/uninstall-cli-genie.sh | sh
+```
+#### Manual installation
+To install cli-genie manually, run the following commands:
+```
+cd ~/
 git clone https://github.com/JM-Lab/cli-genie.git
 cd cli-genie
 ./gradlew install
