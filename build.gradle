@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'kr.jmlab:jmlab-utils-java11:0.1.4'
+    implementation 'kr.jmlab:openai-java-client:0.1.0'
     implementation 'commons-cli:commons-cli:1.5.0'
     implementation 'org.slf4j:slf4j-simple:1.7.36'
     implementation 'com.king.king-http-client:king-http-client:3.0.24'

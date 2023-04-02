@@ -48,14 +48,9 @@ class CliGenieTest {
         Assertions.assertEquals("sed -i '' 's/abc/cba/g' test.txt\n" +
                 "\n" +
                 "Paste: Command + V (MacOS).\n" +
-                "1. Using sed command:\n" +
-                "sed -i '' 's/abc/cba/g' test.txt\n" +
-                "\n" +
-                "2. Using awk command:\n" +
-                "awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt\n" +
-                "\n" +
-                "3. Using perl command:\n" +
-                "perl -pi -e 's/abc/cba/g' test.txt\n" +
+                "1. sed -i '' 's/abc/cba/g' test.txt\n" +
+                "2. perl -pi -e 's/abc/cba/g' test.txt\n" +
+                "3. awk '{gsub(/abc/, \"cba\")}1' test.txt > temp && mv temp test.txt\n" +
                 "\n" +
                 "Paste: Command + V (MacOS).", newConsole.toString().trim());
     }
@@ -104,20 +99,9 @@ class CliGenieTest {
     @Disabled
     @Test
     void startWithClipboard() throws IOException, UnsupportedFlavorException {
-        String expected = "1. Using sed command:\n" +
-                "```\n" +
-                "sed -i '' 's/abc/cba/g' test.txt\n" +
-                "```\n" +
-                "\n" +
-                "2. Using awk command:\n" +
-                "```\n" +
-                "awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt\n" +
-                "```\n" +
-                "\n" +
-                "3. Using perl command:\n" +
-                "```\n" +
+        String expected = "sed -i '' 's/abc/cba/g' test.txt\n" +
                 "perl -pi -e 's/abc/cba/g' test.txt\n" +
-                "```";
+                "awk '{gsub(/abc/,\"cba\")}1' test.txt > temp && mv temp test.txt";
 
         CliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 명령 3개");
         previousConsole.println(newConsole);
@@ -134,13 +118,7 @@ class CliGenieTest {
     @Disabled
     @Test
     void startAsk() {
-        String expected = "Java 설치 명령어는 다음과 같습니다:\n" +
-                "\n" +
-                "```\n" +
-                "brew install java\n" +
-                "``` \n" +
-                "\n" +
-                "이 명령어는 Homebrew 패키지 매니저를 사용하여 Java를 설치합니다. Homebrew가 설치되어 있지 않은 경우, 먼저 Homebrew를 설치해야 합니다.";
+        String expected = "java 설치 명령어: brew install java";
 
         CliGenie.main("java 설치 명령어");
         previousConsole.println(newConsole);

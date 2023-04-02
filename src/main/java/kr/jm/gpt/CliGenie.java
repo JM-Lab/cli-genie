@@ -1,7 +1,10 @@
 package kr.jm.gpt;
 
-import kr.jm.gpt.openai.OpenAiChatCompletionsSse;
-import kr.jm.gpt.openai.sse.OpenAiChatCompletionsSseConsumer;
+import kr.jm.openai.OpenAiChatCompletions;
+import kr.jm.openai.dto.Message;
+import kr.jm.openai.dto.OpenAiChatCompletionsRequest;
+import kr.jm.openai.dto.Role;
+import kr.jm.openai.sse.OpenAiSseChatCompletionsPartConsumer;
 import kr.jm.utils.JMArrays;
 import kr.jm.utils.JMOptional;
 import kr.jm.utils.JMResources;
@@ -14,9 +17,11 @@ import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class CliGenie {
@@ -49,33 +54,49 @@ public class CliGenie {
 
     private static void handleOptionAndSpell(CliOptionsPrompt cliOptionsPrompt) {
         String result = handleOptionAndSpell(new CliGenie(), cliOptionsPrompt, cliOptionsPrompt.getPrompt(),
-                new OpenAiChatCompletionsSse(getOpenaiApiKey()),
-                new OpenAiChatCompletionsSseConsumer(System.out::print));
+                new OpenAiChatCompletions(getOpenaiApiKey()),
+                new OpenAiSseChatCompletionsPartConsumer(System.out::print));
         System.out.println();
         handlePostOptions(result, cliOptionsPrompt.getOptions());
     }
 
     private static String handleOptionAndSpell(CliGenie cliGenie, CliOptionsPrompt cliOptionsPrompt, String prompt,
-            OpenAiChatCompletionsSse openAiChatCompletionsSse,
-            OpenAiChatCompletionsSseConsumer openAiChatCompletionsSseConsumer) {
+            OpenAiChatCompletions openAiChatCompletions,
+            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
         return Optional.ofNullable(
-                handleGeneralQuery(cliGenie, cliOptionsPrompt.getOptions(), prompt, openAiChatCompletionsSse,
-                        openAiChatCompletionsSseConsumer)).orElseGet(() -> handleCliQuery(cliGenie, prompt,
-                openAiChatCompletionsSse, openAiChatCompletionsSseConsumer));
+                handleGeneralQuery(cliGenie, cliOptionsPrompt.getOptions(), prompt, openAiChatCompletions,
+                        openAiSseChatCompletionsPartConsumer)).orElseGet(() -> handleCliQuery(cliGenie, prompt,
+                openAiChatCompletions, openAiSseChatCompletionsPartConsumer));
     }
 
     private static String handleGeneralQuery(CliGenie cliGenie, Set<String> options, String prompt,
-            OpenAiChatCompletionsSse openAiChatCompletionsSse,
-            OpenAiChatCompletionsSseConsumer openAiChatCompletionsSseConsumer) {
+            OpenAiChatCompletions openAiChatCompletions,
+            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
         return Objects.nonNull(options) && options.contains("general") ? cliGenie.spell(prompt,
-                spell -> openAiChatCompletionsSse.requestWithSse(spell, openAiChatCompletionsSseConsumer)) : null;
+                spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
+                        List.of(new Message(Role.user, spell)))) : null;
+    }
+
+    private static String requestWithSse(OpenAiChatCompletions openAiChatCompletions,
+            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer, List<Message> messages) {
+        try {
+            return openAiChatCompletions.requestWithSse(
+                    new OpenAiChatCompletionsRequest().setModel("gpt-3.5-turbo").setMaxTokens(3000)
+                            .setTemperature(0D).setStream(true).setMessages(messages),
+                    openAiSseChatCompletionsPartConsumer).get().getChoices().get(0).getMessage().getContent();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String handleCliQuery(CliGenie cliGenie, String prompt,
-            OpenAiChatCompletionsSse openAiChatCompletionsSse,
-            OpenAiChatCompletionsSseConsumer openAiChatCompletionsSseConsumer) {
-        return cliGenie.spell(prompt, spell -> openAiChatCompletionsSse.setSystemPrompt("in the language as the ASK")
-                .requestWithSse(cliGenie.buildPromptWithCondition(spell), openAiChatCompletionsSseConsumer));
+            OpenAiChatCompletions openAiChatCompletions,
+            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
+        return cliGenie.spell(prompt,
+                spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
+                        List.of(new Message(Role.user, cliGenie.buildPromptWithCondition(spell)),
+                                new Message(Role.system,
+                                        "- don't explain.\n- don't use backticks(```).\n- in the language as the ASK."))));
     }
 
     private static void handlePostOptions(String result, Set<String> options) {
