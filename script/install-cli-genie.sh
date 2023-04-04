@@ -3,6 +3,17 @@ if [ $EUID != 0 ]; then
     sudo "$0" "$@"
     exit $?
 fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # check if Homebrew is installed
+    if ! command -v brew &> /dev/null
+    then
+        echo "Homebrew is not installed. Installing Homebrew..."
+        # install Homebrew
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+fi
+
 # check if java is installed
 if ! command -v java &> /dev/null
 then
