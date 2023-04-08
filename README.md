@@ -32,7 +32,7 @@ CLI Genie is especially useful for IT engineers or software engineers who primar
 #### Auto-install with dependencies
 You can install cli-genie with its dependencies by running the following command:
 ```
-curl https://raw.githubusercontent.com/JM-Lab/cli-genie/main/script/install-cli-genie.sh | sh
+curl https://raw.githubusercontent.com/JM-Lab/cli-genie/main/script/install-cli-genie.sh | sudo sh
 export OPENAI_API_KEY=[your key]
 ```
 #### Uninstall
@@ -49,6 +49,7 @@ cd cli-genie
 ./gradlew install
 sudo cp bin/cg /usr/local/bin
 echo "alias cgg='cg -g'" >> ~/.bashrc
+source ~/.bashrc
 export OPENAI_API_KEY=[your key]
 ```
 ### Windows
