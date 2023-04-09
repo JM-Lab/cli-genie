@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # remove cgg alias from bashrc
-sed -i '/alias cgg/d' ~/.bashrc
+sed -i.bak '/alias cgg/d' ~/.bashrc && rm ~/.bashrc.bak
 
 # remove cli-genie installation
 sudo rm /usr/local/bin/cg

@@ -1,8 +1,4 @@
 #!/bin/bash
-if [ $EUID != 0 ]; then
-    sudo "$0" "$@"
-    exit $?
-fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # check if Homebrew is installed
@@ -82,6 +78,8 @@ sudo cp bin/cg /usr/local/bin
 echo "alias cgg='cg -g'" >> ~/.bashrc
 
 # source bashrc
+sleep 1
 source ~/.bashrc
 
 echo "cli-genie installation is complete."
+
