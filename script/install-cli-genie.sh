@@ -71,15 +71,17 @@ git clone https://github.com/JM-Lab/cli-genie.git
 
 # install cli-genie
 cd cli-genie
-./gradlew install
-sudo cp bin/cg /usr/local/bin
 
-# add alias to bashrc
-echo "alias cgg='cg -g'" >> ~/.bashrc
+if ./gradlew install; then
+  echo "Gradle task succeeded"
+  sudo cp bin/cg /usr/local/bin
 
-# source bashrc
-sleep 1
-source ~/.bashrc
+  # add alias to bashrc
+  echo "alias cgg='cg -g'" >> ~/.bashrc
 
-echo "cli-genie installation is complete."
-
+  # source bashrc
+  source ~/.bashrc
+  echo "cli-genie installation is complete."
+else
+  echo "cli-genie installationk failed"
+fi
