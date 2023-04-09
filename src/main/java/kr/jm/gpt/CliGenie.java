@@ -25,14 +25,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class CliGenie {
-    private final String preConditionPrompt;
+    private final String userPromptFormat;
 
 
     public CliGenie() {
         String lineSeparator = OS.getLineSeparator();
-        this.preConditionPrompt = "Platform: " + OS.getOsName() + lineSeparator + "Version: " + OS.getOsVersion() +
-                lineSeparator + "Do Not: explanations" + lineSeparator +
-                "Generate a shell command or recommendation to the following ASK" + lineSeparator + "ASK: ";
+        this.userPromptFormat =
+                "Platform: " + OS.getOsName() + lineSeparator + "Version: " + OS.getOsVersion() + lineSeparator +
+                        "Generate a shell command or recommendation to %s" + lineSeparator +
+                        "- Do Not: explanations and code blocks(```)\n- Response: in my language";
     }
 
     public String spell(String prmpter, Function<String, String> spellFunction) {
@@ -40,7 +41,7 @@ public class CliGenie {
     }
 
     String buildPromptWithCondition(String nativeLang) {
-        return preConditionPrompt + nativeLang;
+        return String.format(userPromptFormat, nativeLang);
     }
 
     public static void main(String... args) {
@@ -74,15 +75,16 @@ public class CliGenie {
             OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
         return Objects.nonNull(options) && options.contains("general") ? cliGenie.spell(prompt,
                 spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
-                        List.of(new Message(Role.user, spell)))) : null;
+                        List.of(new Message(Role.user, spell)), 1D)) : null;
     }
 
     private static String requestWithSse(OpenAiChatCompletions openAiChatCompletions,
-            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer, List<Message> messages) {
+            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer, List<Message> messages,
+            Double temperature) {
         try {
             return openAiChatCompletions.requestWithSse(
                     new OpenAiChatCompletionsRequest().setModel("gpt-3.5-turbo").setMaxTokens(3000)
-                            .setTemperature(0D).setStream(true).setMessages(messages),
+                            .setTemperature(temperature).setStream(true).setMessages(messages),
                     openAiSseChatCompletionsPartConsumer).get().getChoices().get(0).getMessage().getContent();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -94,9 +96,7 @@ public class CliGenie {
             OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
         return cliGenie.spell(prompt,
                 spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
-                        List.of(new Message(Role.user, cliGenie.buildPromptWithCondition(spell)),
-                                new Message(Role.system,
-                                        "- don't explain.\n- don't use backticks(```).\n- in the language as the ASK."))));
+                        List.of(new Message(Role.user, cliGenie.buildPromptWithCondition(spell))), 0D));
     }
 
     private static void handlePostOptions(String result, Set<String> options) {

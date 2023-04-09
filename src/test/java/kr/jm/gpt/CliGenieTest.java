@@ -19,7 +19,6 @@ import static kr.jm.gpt.CliGenieCommandLineTest.HELP;
 class CliGenieTest {
     static PrintStream previousConsole;
     static ByteArrayOutputStream newConsole;
-    static String openAiKey;
 
     @BeforeEach
     void beforeEach() {
@@ -31,6 +30,31 @@ class CliGenieTest {
     @AfterEach
     void afterEach() {
         System.setOut(previousConsole);
+    }
+
+    // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
+    @Disabled
+    @Test
+    void startTestQuery() {
+        CliGenie.main("Dockerfile을 사용해서 도커를 실행하는 방법");
+        previousConsole.println(newConsole);
+        Assertions.assertEquals(
+                "도커를 실행하는 방법은 다음과 같습니다.\n" +
+                        "\n" +
+                        "1. Dockerfile을 작성합니다.\n" +
+                        "2. Dockerfile을 빌드합니다. (docker build 명령어 사용)\n" +
+                        "3. 이미지를 실행합니다. (docker run 명령어 사용)\n" +
+                        "\n" +
+                        "예를 들어, Dockerfile을 작성하고 빌드한 후에 다음과 같은 명령어를 사용하여 이미지를 실행할 수 있습니다.\n" +
+                        "\n" +
+                        "```\n" +
+                        "docker run -it --rm <이미지 이름>\n" +
+                        "```\n" +
+                        "\n" +
+                        "위 명령어에서 -it 옵션은 터미널을 사용할 수 있도록 해주고, --rm 옵션은 컨테이너가 종료되면 자동으로 삭제되도록 설정합니다. 이미지 이름은 Dockerfile에서 설정한 이름을 사용하면 됩니다.\n" +
+                        "\n" +
+                        "Paste: Command + V (MacOS).",
+                newConsole.toString().trim());
     }
 
     // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
@@ -156,15 +180,15 @@ class CliGenieTest {
         String prompt = new CliGenie().buildPromptWithCondition("플랫폼 이름과 버전");
         Assertions.assertEquals("Platform: Mac OS X\n" +
                 "Version: 10.16\n" +
-                "Do Not: explanations\n" +
-                "Generate a shell command or recommendation to the following ASK\n" +
-                "ASK: 플랫폼 이름과 버전", prompt);
+                "Generate a shell command or recommendation to 플랫폼 이름과 버전\n" +
+                "- Do Not: explanations and code blocks(```)\n" +
+                "- Response: in my language", prompt);
         prompt = new CliGenie().buildPromptWithCondition("플랫폼 이름과 버전 알수 있는 예를 3개 보여줘");
         Assertions.assertEquals("Platform: Mac OS X\n" +
                 "Version: 10.16\n" +
-                "Do Not: explanations\n" +
-                "Generate a shell command or recommendation to the following ASK\n" +
-                "ASK: 플랫폼 이름과 버전 알수 있는 예를 3개 보여줘", prompt);
+                "Generate a shell command or recommendation to 플랫폼 이름과 버전 알수 있는 예를 3개 보여줘\n" +
+                "- Do Not: explanations and code blocks(```)\n" +
+                "- Response: in my language", prompt);
     }
 
 }
