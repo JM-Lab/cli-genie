@@ -53,7 +53,7 @@ class CliGenieTest {
                         "\n" +
                         "위 명령어에서 -it 옵션은 터미널을 사용할 수 있도록 해주고, --rm 옵션은 컨테이너가 종료되면 자동으로 삭제되도록 설정합니다. 이미지 이름은 Dockerfile에서 설정한 이름을 사용하면 됩니다.\n" +
                         "\n" +
-                        "Paste: Command + V (MacOS).",
+                        "Outputs copied, please paste it: Command + V (MacOS).",
                 newConsole.toString().trim());
     }
 
@@ -63,7 +63,7 @@ class CliGenieTest {
     void start() {
         CliGenie.main("test.txt 파일에서 abc 라는 글자를 cba 로 바꾸는 법");
         Assertions.assertEquals(
-                "sed -i '' 's/abc/cba/g' test.txt\n\nPaste: Command + V (MacOS).",
+                "sed -i '' 's/abc/cba/g' test.txt\n\nOutputs copied, please paste it: Command + V (MacOS).",
                 newConsole.toString().trim());
         previousConsole.println(newConsole);
 
@@ -71,12 +71,12 @@ class CliGenieTest {
         previousConsole.println(newConsole);
         Assertions.assertEquals("sed -i '' 's/abc/cba/g' test.txt\n" +
                 "\n" +
-                "Paste: Command + V (MacOS).\n" +
+                "Outputs copied, please paste it: Command + V (MacOS).\n" +
                 "1. sed -i '' 's/abc/cba/g' test.txt\n" +
                 "2. perl -pi -e 's/abc/cba/g' test.txt\n" +
                 "3. awk '{gsub(/abc/, \"cba\")}1' test.txt > temp && mv temp test.txt\n" +
                 "\n" +
-                "Paste: Command + V (MacOS).", newConsole.toString().trim());
+                "Outputs copied, please paste it: Command + V (MacOS).", newConsole.toString().trim());
     }
 
     // IMPORTANT: Please set the OPENAI_API_KEY environment variable before running tests.
@@ -99,7 +99,7 @@ class CliGenieTest {
                         "\n" +
                         "이 스크립트는 'test.txt' 파일을 열어서 파일 내용을 읽은 다음, 'abc'를 'cba'로 바꾸고 다시 파일에 쓰는 것입니다. 이 스크립트를 실행하면 파일 내용이 변경됩니다.\n" +
                         "\n" +
-                        "Paste: Command + V (MacOS).",
+                        "Outputs copied, please paste it: Command + V (MacOS).",
                 newConsole.toString().trim());
         previousConsole.println(newConsole);
     }
@@ -135,7 +135,7 @@ class CliGenieTest {
 
         Assertions.assertEquals(expected, Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null)
                 .getTransferData(DataFlavor.stringFlavor));
-        Assertions.assertEquals(expected + "\n\nPaste: Command + V (MacOS).",
+        Assertions.assertEquals(expected + "\n\nOutputs copied, please paste it: Command + V (MacOS).",
                 newConsole.toString().trim());
     }
 
@@ -146,7 +146,7 @@ class CliGenieTest {
 
         CliGenie.main("java 설치 명령어");
         previousConsole.println(newConsole);
-        Assertions.assertEquals(expected + "\n\nPaste: Command + V (MacOS).",
+        Assertions.assertEquals(expected + "\n\nOutputs copied, please paste it: Command + V (MacOS).",
                 newConsole.toString().trim());
     }
 
@@ -189,6 +189,16 @@ class CliGenieTest {
                 "Generate a shell command or recommendation to 플랫폼 이름과 버전 알수 있는 예를 3개 보여줘\n" +
                 "- Do Not: explanations and code blocks(```)\n" +
                 "- Response: in my language", prompt);
+    }
+
+    @Test
+    void analysisTokenTest() {
+        CliGenie.main("-tc", "Dockerfile을 사용해서 도커를 실행하는 방법");
+        previousConsole.println(newConsole);
+        Assertions.assertEquals("Tokens  Character TOKEN IDS\n" +
+                "17      28        [35, 13973, 1213, 18359, 41820, 97237, 65905, 226, 168, 119, 97, 18918, 86888, 44005, 75908, 28617, 243]\n" +
+                "\n" +
+                "Outputs copied, please paste it: Command + V (MacOS).", newConsole.toString().trim());
     }
 
 }
