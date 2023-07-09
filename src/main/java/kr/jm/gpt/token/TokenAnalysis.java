@@ -6,9 +6,16 @@ import java.util.List;
 
 @Value
 public class TokenAnalysis {
-    private String prompt;
-    private int tokenCount;
-    private List<Integer> tokenIds;
-    private List<String> readableParts;
-    private List<Integer> partTokenCounts;
+    String prompt;
+    List<Integer> tokenIds;
+    List<String> readableParts;
+    List<Integer> partTokenCounts;
+
+    public int getPromptLength() {
+        return this.prompt.length();
+    }
+
+    public int getTokenCount() {
+        return this.tokenIds.size();
+    }
 }

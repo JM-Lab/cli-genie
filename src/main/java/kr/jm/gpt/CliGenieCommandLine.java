@@ -55,7 +55,7 @@ public class CliGenieCommandLine {
 
     private CliOptionsPrompt buildCommandLine(CommandLine commandLine) {
         CliOptionsPrompt cliOptionsPrompt = new CliOptionsPrompt();
-        cliOptionsPrompt.setOptions(JMStream.buildStream(commandLine.getOptions()).map(option -> option.getOpt())
+        cliOptionsPrompt.setOptions(JMStream.buildStream(commandLine.getOptions()).map(Option::getOpt)
                 .collect(Collectors.toSet()));
         return cliOptionsPrompt.setPrompt(JMString.joiningWithSpace(commandLine.getArgList()));
     }

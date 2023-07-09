@@ -17,9 +17,10 @@ class GptTokenAnalyzerTest {
         TokenAnalysis tokenAnalysis = TokenAnalyzer.analysis(prompt);
         System.out.println(tokenAnalysis);
         Assertions.assertEquals(prompt, tokenAnalysis.getPrompt());
+        Assertions.assertEquals(prompt.length(), tokenAnalysis.getPromptLength());
         Assertions.assertEquals(prompt,
                 tokenAnalysis.getReadableParts().stream().collect(Collectors.joining()));
-        Assertions.assertEquals(tokenAnalysis.getTokenIds().size(), tokenAnalysis.getTokenCount());
+        Assertions.assertEquals(TokenAnalyzer.getTokenCount(prompt), tokenAnalysis.getTokenCount());
         Assertions.assertEquals(tokenAnalysis.getTokenCount(),
                 tokenAnalysis.getPartTokenCounts().stream().mapToInt(Integer::intValue).sum());
         Assertions.assertEquals(tokenAnalysis.getPartTokenCounts().size(),

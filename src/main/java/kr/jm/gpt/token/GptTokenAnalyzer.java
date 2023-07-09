@@ -19,8 +19,12 @@ public class GptTokenAnalyzer {
         this.pattern = Pattern.compile("�|ு|്|்");
     }
 
-    public List<String> getTokenStrings(String prompt) {
-        return getTokenStrings(encoding.encodeOrdinary(prompt));
+    public List<Integer> getTokenIds(String prompt) {
+        return encoding.encodeOrdinary(prompt);
+    }
+
+    public int getTokenCount(String prompt) {
+        return getTokenIds(prompt).size();
     }
 
     private List<String> getTokenStrings(List<Integer> tokenIds) {
@@ -29,11 +33,10 @@ public class GptTokenAnalyzer {
 
     public TokenAnalysis analysis(String prompt) {
         String subPrompt = prompt;
-        List<Integer> tokenIds = encoding.encodeOrdinary(prompt);
+        List<Integer> tokenIds = getTokenIds(prompt);
         List<String> readableParts = new ArrayList<>();
         List<Integer> partTokenCounts = new ArrayList<>();
         List<String> tokenStrings = getTokenStrings(tokenIds);
-        int totalTokenCount = tokenStrings.size();
         int tempTokenCount = 0;
         for (String tokenString : tokenStrings) {
             if (pattern.matcher(tokenString).find() || !subPrompt.contains(tokenString)) {
@@ -56,7 +59,6 @@ public class GptTokenAnalyzer {
             readableParts.add(subPrompt);
         }
 
-        return new TokenAnalysis(prompt, totalTokenCount, tokenIds, readableParts, partTokenCounts);
+        return new TokenAnalysis(prompt, tokenIds, readableParts, partTokenCounts);
     }
-
 }
