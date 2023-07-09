@@ -20,7 +20,21 @@ CLI Genie is especially useful for IT engineers or software engineers who primar
    * CLI Genie can receive updates as they happen, allowing for a more interactive and responsive experience.
    
 5. General Question-Answering with GPT
-   * Users can ask general questions to CLI Genie using CLI commands 'cgg' (same as 'cg -g') just like ChatGPT.
+   * Users can ask general questions to CLI Genie using CLI commands 'cgg' (same as 'cg -g') similar to ChatGPT.
+
+6. Tokenizer for GPT-3.5-turbo and GPT-4 (**No OpenAI API key is required**)
+   * Provides token count and token IDs for the given prompt through CLI Genie using CLI commands 'cgt' (same as 'cg -tc').
+   * Example
+     ```
+     cgt test.txt 파일에서 "abc"를 "cba"로 바꿔주세요
+     ```
+   * Result
+     ```
+     Tokens  Character TOKEN IDS
+     17      33        [1985, 3996, 68729, 57575, 330, 13997, 1, 18918, 330, 94929, 1, 17835, 82818, 166, 123, 242, 92769]
+     
+     Outputs copied, please paste it: Command + V (MacOS).
+     ```
 
 ## Installation
 ### Requirements
@@ -32,7 +46,7 @@ CLI Genie is especially useful for IT engineers or software engineers who primar
 #### Auto-install with dependencies
 You can install cli-genie with its dependencies by running the following command:
 ```
-curl https://raw.githubusercontent.com/JM-Lab/cli-genie/main/script/install-cli-genie.sh | sudo sh
+curl https://raw.githubusercontent.com/JM-Lab/cli-genie/main/script/install-cli-genie.sh | sh
 export OPENAI_API_KEY=[your key]
 ```
 #### Uninstall
@@ -49,6 +63,7 @@ cd cli-genie
 ./gradlew install
 sudo cp bin/cg /usr/local/bin
 echo "alias cgg='cg -g'" >> ~/.bashrc
+echo "alias cgt='cg -tc'" >> ~/.bashrc
 source ~/.bashrc
 export OPENAI_API_KEY=[your key]
 ```
