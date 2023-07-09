@@ -17,9 +17,10 @@ class CliGenieCommandLineTest {
             "cg replace the letters \"abc\" with \"cba\" in the file test.txt\n" +
             "\n" +
             "Options:\n" +
-            " -g,--general   General query to GPT\n" +
-            " -h,--help      Print help message\n" +
-            " -n,--no        Do not use copy to clipboard\n" +
+            " -g,--general                General query to GPT\n" +
+            " -h,--help                   Print help message\n" +
+            " -n,--no                     Do not use copy to clipboard\n" +
+            " -tc,--token-counter-cl100   Count tokens based on cl100k encoding\n" +
             "\n" +
             "To ask general questions to GPT, use 'cgg' (same as 'cg -g') in linux or mac.\n" +
             "CLI Genie: https://github.com/JM-Lab/cli-genie";
@@ -67,4 +68,5 @@ class CliGenieCommandLineTest {
         assertEquals(HELP, newConsole.toString().trim());
         System.setOut(previousConsole);
     }
+
 }

@@ -49,12 +49,13 @@ public class CliGenieCommandLine {
         options.addOption("g", "general", false, "General query to GPT");
         options.addOption("h", "help", false, "Print help message");
         options.addOption("n", "no", false, "Do not use copy to clipboard");
+        options.addOption("tc", "token-counter-cl100", false, "Count tokens based on cl100k encoding");
         return options;
     }
 
     private CliOptionsPrompt buildCommandLine(CommandLine commandLine) {
         CliOptionsPrompt cliOptionsPrompt = new CliOptionsPrompt();
-        cliOptionsPrompt.setOptions(JMStream.buildStream(commandLine.getOptions()).map(option -> option.getLongOpt())
+        cliOptionsPrompt.setOptions(JMStream.buildStream(commandLine.getOptions()).map(Option::getOpt)
                 .collect(Collectors.toSet()));
         return cliOptionsPrompt.setPrompt(JMString.joiningWithSpace(commandLine.getArgList()));
     }
