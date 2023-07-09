@@ -1,5 +1,8 @@
 package kr.jm.gpt;
 
+import com.knuddels.jtokkit.api.EncodingType;
+import kr.jm.gpt.token.GptTokenAnalyzer;
+import kr.jm.gpt.token.TokenAnalysis;
 import kr.jm.openai.OpenAiChatCompletions;
 import kr.jm.openai.dto.Message;
 import kr.jm.openai.dto.OpenAiChatCompletionsRequest;
@@ -27,7 +30,6 @@ import java.util.function.Function;
 public class CliGenie {
     private final String userPromptFormat;
 
-
     public CliGenie() {
         String lineSeparator = OS.getLineSeparator();
         this.userPromptFormat =
@@ -54,26 +56,39 @@ public class CliGenie {
     }
 
     private static void handleOptionAndSpell(CliOptionsPrompt cliOptionsPrompt) {
-        String result = handleOptionAndSpell(new CliGenie(), cliOptionsPrompt, cliOptionsPrompt.getPrompt(),
-                new OpenAiChatCompletions(getOpenaiApiKey()),
-                new OpenAiSseChatCompletionsPartConsumer(System.out::print));
         System.out.println();
-        handlePostOptions(result, cliOptionsPrompt.getOptions());
+        handlePostOptions(handleGptPromptOption(cliOptionsPrompt.getOptions(), cliOptionsPrompt.getPrompt()),
+                cliOptionsPrompt.getOptions());
     }
 
-    private static String handleOptionAndSpell(CliGenie cliGenie, CliOptionsPrompt cliOptionsPrompt, String prompt,
+    private static String handleGptPromptOption(Set<String> cliOptions, String prompt) {
+        return cliOptions.contains("tc") ? handleTokenCounterOption(
+                new GptTokenAnalyzer(EncodingType.CL100K_BASE).analysis(prompt))
+                : handleOptionAndSpell(new CliGenie(), cliOptions, prompt, new OpenAiChatCompletions(getOpenaiApiKey()),
+                new OpenAiSseChatCompletionsPartConsumer(System.out::print));
+    }
+
+    private static String handleTokenCounterOption(TokenAnalysis tokenAnalysis) {
+        String tokenCounterString = String.format("%-8s%-10s%s", "Tokens", "Character", "TOKEN IDS\n") +
+                String.format("%-8d%-10d%s", tokenAnalysis.getTokenCount(),
+                        tokenAnalysis.getPrompt().length(), tokenAnalysis.getTokenIds().toString());
+        System.out.println(tokenCounterString);
+        return tokenCounterString;
+    }
+
+    private static String handleOptionAndSpell(CliGenie cliGenie, Set<String> cliOptions, String prompt,
             OpenAiChatCompletions openAiChatCompletions,
             OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
         return Optional.ofNullable(
-                handleGeneralQuery(cliGenie, cliOptionsPrompt.getOptions(), prompt, openAiChatCompletions,
+                handleGeneralQuery(cliGenie, cliOptions, prompt, openAiChatCompletions,
                         openAiSseChatCompletionsPartConsumer)).orElseGet(() -> handleCliQuery(cliGenie, prompt,
                 openAiChatCompletions, openAiSseChatCompletionsPartConsumer));
     }
 
-    private static String handleGeneralQuery(CliGenie cliGenie, Set<String> options, String prompt,
+    private static String handleGeneralQuery(CliGenie cliGenie, Set<String> cliOptions, String prompt,
             OpenAiChatCompletions openAiChatCompletions,
             OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
-        return Objects.nonNull(options) && options.contains("general") ? cliGenie.spell(prompt,
+        return cliOptions.contains("g") ? cliGenie.spell(prompt,
                 spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
                         List.of(new Message(Role.user, spell)), 1D)) : null;
     }
@@ -121,13 +136,13 @@ public class CliGenie {
     private static void showCopyAndPasteInfo(String osName) {
         if (osName.contains("linux")) {
             System.out.println(OS.getLineSeparator() +
-                    "Paste: Ctrl + Shift + V (Linux).");
+                    "Outputs copied, please paste it: Ctrl + Shift + V (Linux).");
         } else if (osName.contains("mac")) {
             System.out.println(
-                    OS.getLineSeparator() + "Paste: Command + V (MacOS).");
+                    OS.getLineSeparator() + "Outputs copied, please paste it: Command + V (MacOS).");
         } else if (osName.contains("windows")) {
             System.out.println(
-                    OS.getLineSeparator() + "Paste: Ctrl + V (Windows).");
+                    OS.getLineSeparator() + "Outputs copied, please paste it: Ctrl + V (Windows).");
         }
     }
 
