@@ -81,10 +81,12 @@ if ./gradlew install; then
   if [ "$SHELL_TYPE" = "zsh" ]; then
     # add alias to bashrc
     echo "alias cgg='cg -g'" >> ~/.zshrc
+    echo "alias cgt='cg -tc'" >> ~/.zshrc
     source ~/.zshrc
   else
     # add alias to bashrc
     echo "alias cgg='cg -g'" >> ~/.bashrc
+    echo "alias cgt='cg -tc'" >> ~/.bashrc
     source ~/.bashrc
   fi
   
