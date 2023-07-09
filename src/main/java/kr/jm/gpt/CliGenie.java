@@ -1,8 +1,7 @@
 package kr.jm.gpt;
 
+import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.EncodingType;
-import kr.jm.gpt.token.GptTokenAnalyzer;
-import kr.jm.gpt.token.TokenAnalysis;
 import kr.jm.openai.OpenAiChatCompletions;
 import kr.jm.openai.dto.Message;
 import kr.jm.openai.dto.OpenAiChatCompletionsRequest;
@@ -62,16 +61,16 @@ public class CliGenie {
     }
 
     private static String handleGptPromptOption(Set<String> cliOptions, String prompt) {
-        return cliOptions.contains("tc") ? handleTokenCounterOption(
-                new GptTokenAnalyzer(EncodingType.CL100K_BASE).analysis(prompt))
+        return cliOptions.contains("tc") ?
+                handleTokenCounterOption(Encodings.newLazyEncodingRegistry().getEncoding(EncodingType.CL100K_BASE)
+                        .encodeOrdinary(prompt), prompt.length())
                 : handleOptionAndSpell(new CliGenie(), cliOptions, prompt, new OpenAiChatCompletions(getOpenaiApiKey()),
                 new OpenAiSseChatCompletionsPartConsumer(System.out::print));
     }
 
-    private static String handleTokenCounterOption(TokenAnalysis tokenAnalysis) {
+    private static String handleTokenCounterOption(List<Integer> tokenIds, int characterLength) {
         String tokenCounterString = String.format("%-8s%-10s%s", "Tokens", "Character", "TOKEN IDS\n") +
-                String.format("%-8d%-10d%s", tokenAnalysis.getTokenCount(),
-                        tokenAnalysis.getPrompt().length(), tokenAnalysis.getTokenIds().toString());
+                String.format("%-8d%-10d%s", tokenIds.size(), characterLength, tokenIds);
         System.out.println(tokenCounterString);
         return tokenCounterString;
     }
