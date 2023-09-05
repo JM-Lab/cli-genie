@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'kr.jmlab'
-version '0.1.0'
+version '0.1.1'
 
 repositories {
     mavenLocal()
@@ -13,10 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'kr.jmlab:openai-java-client:0.1.2'
+    implementation 'kr.jmlab:openai-java-client:0.1.3'
     implementation 'commons-cli:commons-cli:1.5.0'
     implementation 'org.slf4j:slf4j-simple:1.7.36'
-    implementation 'com.king.king-http-client:king-http-client:3.0.24'
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
