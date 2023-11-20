@@ -27,22 +27,24 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class CliGenie {
+    private final Message systemMessage;
     private final String userPromptFormat;
 
     public CliGenie() {
         String lineSeparator = OS.getLineSeparator();
-        this.userPromptFormat =
-                "Platform: " + OS.getOsName() + lineSeparator + "Version: " + OS.getOsVersion() + lineSeparator +
-                        "Generate a shell command or recommendation to %s" + lineSeparator +
-                        "- Do Not: explanations and code blocks(```)\n- Response: in my language";
+        this.systemMessage =
+                new Message(Role.system,
+                        "Act as CLI Assistant for " + OS.getOsName() + " " + OS.getOsVersion() + lineSeparator +
+                                "- Do Not: explanations and code blocks(```)\n- Response: in user's language");
+        this.userPromptFormat = "Generate a shell command or recommendation to %s";
     }
 
     public String spell(String prmpter, Function<String, String> spellFunction) {
         return JMOptional.getOptional(prmpter).map(spellFunction).map(String::trim).orElseThrow();
     }
 
-    String buildPromptWithCondition(String nativeLang) {
-        return String.format(userPromptFormat, nativeLang);
+    List<Message> buildPromptMessageList(String userPrompt) {
+        return List.of(systemMessage, new Message(Role.user, userPrompt));
     }
 
     public static void main(String... args) {
@@ -78,18 +80,12 @@ public class CliGenie {
     private static String handleOptionAndSpell(CliGenie cliGenie, Set<String> cliOptions, String prompt,
             OpenAiChatCompletions openAiChatCompletions,
             OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
-        return Optional.ofNullable(
-                handleGeneralQuery(cliGenie, cliOptions, prompt, openAiChatCompletions,
-                        openAiSseChatCompletionsPartConsumer)).orElseGet(() -> handleCliQuery(cliGenie, prompt,
-                openAiChatCompletions, openAiSseChatCompletionsPartConsumer));
-    }
 
-    private static String handleGeneralQuery(CliGenie cliGenie, Set<String> cliOptions, String prompt,
-            OpenAiChatCompletions openAiChatCompletions,
-            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
         return cliOptions.contains("g") ? cliGenie.spell(prompt,
                 spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
-                        List.of(new Message(Role.user, spell)), 1D)) : null;
+                        cliGenie.buildPromptMessageList(spell), 1D)) : cliGenie.spell(prompt,
+                spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
+                        cliGenie.buildPromptMessageList(String.format(cliGenie.userPromptFormat, spell)), 0D));
     }
 
     private static String requestWithSse(OpenAiChatCompletions openAiChatCompletions,
@@ -99,25 +95,18 @@ public class CliGenie {
             return openAiChatCompletions.requestWithSse(
                     new OpenAiChatCompletionsRequest().setModel("gpt-3.5-turbo").setMaxTokens(3000)
                             .setTemperature(temperature).setStream(true).setMessages(messages),
-                    openAiSseChatCompletionsPartConsumer).get().getChoices().get(0).getMessage().getContent();
+                    () -> openAiSseChatCompletionsPartConsumer).get().getChoices().get(0).getMessage().getContent();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String handleCliQuery(CliGenie cliGenie, String prompt,
-            OpenAiChatCompletions openAiChatCompletions,
-            OpenAiSseChatCompletionsPartConsumer openAiSseChatCompletionsPartConsumer) {
-        return cliGenie.spell(prompt,
-                spell -> requestWithSse(openAiChatCompletions, openAiSseChatCompletionsPartConsumer,
-                        List.of(new Message(Role.user, cliGenie.buildPromptWithCondition(spell))), 0D));
     }
 
     private static void handlePostOptions(String result, Set<String> options) {
         if (Objects.isNull(options) || !options.contains("no")) {
             String osName = System.getProperty("os.name").toLowerCase();
             OS.addShutdownHook(() -> copyToClipboard(osName, result));
-            showCopyAndPasteInfo(osName);
+            Optional.ofNullable(getCopyAndPasteInfo(osName)).ifPresent(copyAndPasteInfo ->
+                    System.out.println(OS.getLineSeparator() + OS.getLineSeparator() + copyAndPasteInfo));
         }
     }
 
@@ -132,17 +121,14 @@ public class CliGenie {
         }
     }
 
-    private static void showCopyAndPasteInfo(String osName) {
-        if (osName.contains("linux")) {
-            System.out.println(OS.getLineSeparator() +
-                    "Outputs copied, please paste it: Ctrl + Shift + V (Linux).");
-        } else if (osName.contains("mac")) {
-            System.out.println(
-                    OS.getLineSeparator() + "Outputs copied, please paste it: Command + V (MacOS).");
-        } else if (osName.contains("windows")) {
-            System.out.println(
-                    OS.getLineSeparator() + "Outputs copied, please paste it: Ctrl + V (Windows).");
-        }
+    private static String getCopyAndPasteInfo(String osName) {
+        if (osName.contains("linux"))
+            return "Outputs copied, please paste it: Ctrl + Shift + V (Linux).";
+        else if (osName.contains("mac"))
+            return "Outputs copied, please paste it: Command + V (MacOS).";
+        else if (osName.contains("windows"))
+            return "Outputs copied, please paste it: Ctrl + V (Windows).";
+        else return null;
     }
 
     private static void copyWithCliToClipboard(String result, String osName) throws IOException {
