@@ -1,5 +1,6 @@
 package kr.jm.gpt;
 
+import kr.jm.openai.dto.Message;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
@@ -11,6 +12,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 
 import static kr.jm.gpt.CliGenieCommandLineTest.HELP;
 
@@ -177,18 +179,14 @@ class CliGenieTest {
     @Test
     @SetEnvironmentVariable(key = "OPENAI_API_KEY", value = "testKey")
     void buildPrompt() {
-        String prompt = new CliGenie().buildPromptWithCondition("플랫폼 이름과 버전");
-        Assertions.assertEquals("Platform: Mac OS X\n" +
-                "Version: 10.16\n" +
-                "Generate a shell command or recommendation to 플랫폼 이름과 버전\n" +
+        List<Message> promptMessageList = new CliGenie().buildPromptMessageList("플랫폼 이름과 버전");
+        Assertions.assertEquals("[Message(role=system, content=Act as CLI Assistant for Mac OS X 10.16\n" +
                 "- Do Not: explanations and code blocks(```)\n" +
-                "- Response: in my language", prompt);
-        prompt = new CliGenie().buildPromptWithCondition("플랫폼 이름과 버전 알수 있는 예를 3개 보여줘");
-        Assertions.assertEquals("Platform: Mac OS X\n" +
-                "Version: 10.16\n" +
-                "Generate a shell command or recommendation to 플랫폼 이름과 버전 알수 있는 예를 3개 보여줘\n" +
+                "- Response: in user's language), Message(role=user, content=플랫폼 이름과 버전)]", promptMessageList.toString());
+        promptMessageList = new CliGenie().buildPromptMessageList("플랫폼 이름과 버전 알수 있는 예를 3개 보여줘");
+        Assertions.assertEquals("[Message(role=system, content=Act as CLI Assistant for Mac OS X 10.16\n" +
                 "- Do Not: explanations and code blocks(```)\n" +
-                "- Response: in my language", prompt);
+                "- Response: in user's language), Message(role=user, content=플랫폼 이름과 버전 알수 있는 예를 3개 보여줘)]", promptMessageList.toString());
     }
 
     @Test
@@ -197,7 +195,7 @@ class CliGenieTest {
         previousConsole.println(newConsole);
         Assertions.assertEquals("Tokens  Character TOKEN IDS\n" +
                 "17      28        [35, 13973, 1213, 18359, 41820, 97237, 65905, 226, 168, 119, 97, 18918, 86888, 44005, 75908, 28617, 243]\n" +
-                "\n" +
+                "\n" + "\n" +
                 "Outputs copied, please paste it: Command + V (MacOS).", newConsole.toString().trim());
     }
 
